@@ -20,8 +20,14 @@ object Day2 {
 
   What is the sum of the IDs of those games?
    */
-  final case class Reveal(red: Int, green: Int, blue: Int)
-  final case class Game(id: Int, reveals: List[Reveal])
+  final case class CubeSet(red: Int, green: Int, blue: Int) {
+    lazy val power = red * green * blue
+  }
+  object CubeSet {
+    val empty: CubeSet = CubeSet(0, 0, 0)
+  }
+
+  final case class Game(id: Int, cubeSets: List[CubeSet])
 
   val MaxRed: Int = 12
   val MaxGreen: Int = 13
@@ -33,33 +39,33 @@ object Day2 {
 
   def extractColorCount(string: String): Int = string.split(" ")(0).toInt
 
-  def sumPossibleGames(): IO[Int] = {
+  // TODO: actually put in error handling
+  def parseGame(string: String): Game = {
+    string.split(":").toList match {
+      case idString :: cubeSetsString =>
+        val id: Int = idString.split(" ")(1).toInt
 
-    // TODO: actually put in error handling
-    def parseGame(string: String): Game = {
-      string.split(":").toList match {
-        case idString :: revealsString =>
-          val id: Int = idString.split(" ")(1).toInt
-
-          val reveals: List[Reveal] = revealsString.head.split(";").toList map { revealString =>
-            revealString.split(",").toList.foldLeft(Reveal(0, 0, 0)) {  (reveal, colorString) =>
-              colorString.trim match {
-                case string if string.contains(Red) =>
-                  reveal.copy(red = extractColorCount(string))
-                case string if string.contains(Green) =>
-                  reveal.copy(green = extractColorCount(string))
-                case string if string.contains(Blue) =>
-                  reveal.copy(blue = extractColorCount(string))
-              }
+        val cubeSets: List[CubeSet] = cubeSetsString.head.split(";").toList map { cubeSetString =>
+          cubeSetString.split(",").toList.foldLeft(CubeSet(0, 0, 0)) { (cubeSet, colorString) =>
+            colorString.trim match {
+              case string if string.contains(Red) =>
+                cubeSet.copy(red = extractColorCount(string))
+              case string if string.contains(Green) =>
+                cubeSet.copy(green = extractColorCount(string))
+              case string if string.contains(Blue) =>
+                cubeSet.copy(blue = extractColorCount(string))
             }
           }
-          Game(id, reveals)
-      }
+        }
+        Game(id, cubeSets)
     }
+  }
+
+  def sumPossibleGames(): IO[Int] = {
 
     def isPossible(game: Game): Boolean =
-      !game.reveals.exists( reveal =>
-        reveal.red > MaxRed || reveal.green > MaxGreen || reveal.blue > MaxBlue
+      !game.cubeSets.exists( cubeSet =>
+        cubeSet.red > MaxRed || cubeSet.green > MaxGreen || cubeSet.blue > MaxBlue
       )
 
     for {
@@ -71,5 +77,34 @@ object Day2 {
       _ <- IO.println(s"possible games: $possibleGames")
     } yield ids.sumAll
 
+  }
+
+  /*
+  Approach - how do determine minimum num of each cube?
+  Scan through every cubeSet, keeping track of the max for each color.
+   */
+  def sumMinimumCubePowers(): IO[Int] = {
+
+    def findMinimumCubeSet(game: Game): CubeSet = {
+      game.cubeSets.foldLeft(CubeSet.empty) { (minimumCubeSet, gameCubeSet) =>
+        val updatedRed =
+          if (gameCubeSet.red > minimumCubeSet.red) minimumCubeSet.copy(red = gameCubeSet.red)
+          else minimumCubeSet
+
+        val updatedGreenAndRed =
+          if (gameCubeSet.green > updatedRed.green) updatedRed.copy(green = gameCubeSet.green)
+          else updatedRed
+
+        if (gameCubeSet.blue > updatedGreenAndRed.blue) updatedGreenAndRed.copy(blue = gameCubeSet.blue)
+        else updatedGreenAndRed
+      }
+    }
+
+    for {
+      lines <- Input.loadAll("Day2.txt")
+      games = lines.map(parseGame)
+      minimumCubeSets = games.map(findMinimumCubeSet)
+      powers = minimumCubeSets.map(_.power)
+    } yield powers.sumAll
   }
 }
