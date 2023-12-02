@@ -20,18 +20,11 @@ object Day1 {
   treb7uchet
   In this example, the calibration values of these four lines are 12, 38, 15, and 77. Adding these together produces 142.
   */
-  def sumCoordinates(): IO[Int] = {
-
-    val file: Resource[IO, Source] = Resource.make(
-      IO(Source.fromResource("Day1.txt"))
-    )(source => IO(source.close()))
-
-    val linesIO = file.use(source => IO(source.getLines().mkString("\n")))
-
+  def sumCoordinates(): IO[Int] =
     for {
-      lines <- linesIO
+      lines <- Input.loadAll("Day1.txt")
       digits <- {
-        lines.split("\n").toList.map { line =>
+        lines.map { line =>
           def getFirstDigit(string: String): IO[Char] = {
             val maybeChar = string.collectFirst {
               case numChar if numChar.isDigit => numChar
@@ -46,7 +39,8 @@ object Day1 {
         }.sequence
       }
     } yield digits.sumAll
-  }
+
+    // Expected result: 53974
 
   /*
   Part 2
@@ -118,9 +112,9 @@ object Day1 {
       }
 
     for {
-      lines <- linesIO
+      lines <- Input.loadAll("Day1.txt")
       digits <- {
-        lines.split("\n").toList.map { line =>
+        lines.map { line =>
           final case class SearchResult(word: String = "", foundDigit: Option[Char] = None)
 
           def digitSearch(searchResult: SearchResult, nextChar: Char)(reverse: Boolean): SearchResult = {

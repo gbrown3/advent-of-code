@@ -12,7 +12,6 @@ object Input {
       IO(Source.fromResource(fileName))
     )(source => IO(source.close()))
 
-//    file.use(source => IO(source.getLines().mkString("\n")))
     file.use(source => IO(source.getLines().toArray.toList))
   }
 }
