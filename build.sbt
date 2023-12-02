@@ -1,5 +1,8 @@
 val scala3Version = "3.3.1"
 
+// Resolves an issue with running Cats Effect in interactive sbt session
+Compile / run / fork := true
+
 lazy val root = project
   .in(file("."))
   .settings(
@@ -8,5 +11,8 @@ lazy val root = project
 
     scalaVersion := scala3Version,
 
-    libraryDependencies += "org.scalameta" %% "munit" % "0.7.29" % Test
+    libraryDependencies ++= List(
+      "org.typelevel" %% "cats-effect" % "3.5.2",
+      "org.scalameta" %% "munit" % "0.7.29" % Test
+    )
   )
