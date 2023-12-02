@@ -1,8 +1,6 @@
 import cats.implicits._
 import cats.effect._
 
-import scala.io.Source
-
 object Day1 {
 
 
@@ -85,12 +83,6 @@ object Day1 {
    2. When determining the current word, prepend the next character rather than appending
    */
   def sumCoordinatesAdvanced(): IO[Int] = {
-
-    val file: Resource[IO, Source] = Resource.make(
-      IO(Source.fromResource("Day1.txt"))
-    )(source => IO(source.close()))
-
-    val linesIO = file.use(source => IO(source.getLines().mkString("\n")))
 
     val wordDigits = Map(
       "one" -> '1',
