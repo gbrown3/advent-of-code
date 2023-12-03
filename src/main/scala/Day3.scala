@@ -92,12 +92,21 @@ object Day3 {
        )
 
         line.zipWithIndex.foldLeft(LoopData()) { case (loopData, (nextChar, index)) =>
-          // We're still building out the part number
           if (nextChar.isDigit) {
-            loopData.copy(
-              currentNumberString = loopData.currentNumberString + nextChar,
-              currentIndices = loopData.currentIndices :+ index
-            )
+            // If we're about to hit the end of the line, save the current number
+            if (index == line.length - 1) {
+              val updatedNumber = loopData.currentNumberString + nextChar
+              val newPartNumber = PartNumber(updatedNumber.toInt, loopData.currentIndices :+ index)
+
+              loopData.copy(partNumbers = loopData.partNumbers :+ newPartNumber)
+            }
+            // Otherwise, keep building out the current part number
+            else {
+              loopData.copy(
+                currentNumberString = loopData.currentNumberString + nextChar,
+                currentIndices = loopData.currentIndices :+ index
+              )
+            }
           }
           else {
             // We've hit the end of a part number
@@ -118,7 +127,6 @@ object Day3 {
          currentLine: String,
          maybeLineBelow: Option[String]
        ): List[Int] = {
-
         getPartNumbersFromLine(currentLine).filter { partNumber =>
           partNumber.indices.exists(index => isAdjacentToSymbol(currentLine, index, maybeLineAbove, maybeLineBelow))
         }.map(_.number)
