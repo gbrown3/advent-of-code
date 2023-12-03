@@ -69,7 +69,7 @@ object Day2 {
       )
 
     for {
-      lines <- Input.loadAll("Day2.txt")
+      lines <- Input.loadAll[IO]("Day2.txt")
       games = lines.map(parseGame)
       possibleGames = games.filter(isPossible)
       ids = possibleGames.map(_.id)
@@ -101,7 +101,7 @@ object Day2 {
     }
 
     for {
-      lines <- Input.loadAll("Day2.txt")
+      lines <- Input.loadAll[IO]("Day2.txt")
       games = lines.map(parseGame)
       minimumCubeSets = games.map(findMinimumCubeSet)
       powers = minimumCubeSets.map(_.power)

@@ -104,7 +104,7 @@ object Day1 {
       }
 
     for {
-      lines <- Input.loadAll("Day1.txt")
+      lines <- Input.loadAll[IO]("Day1.txt")
       digits <- {
         lines.map { line =>
           final case class SearchResult(word: String = "", foundDigit: Option[Char] = None)
