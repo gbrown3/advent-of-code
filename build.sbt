@@ -7,7 +7,7 @@ lazy val root = project
     name := "advent-of-code",
     version := "0.1.0-SNAPSHOT",
 
-    scalaVersion := "2.13.12",
+    scalaVersion := "3.3.1",
 
     libraryDependencies ++= List(
       "org.typelevel" %% "cats-effect" % "3.5.2",
