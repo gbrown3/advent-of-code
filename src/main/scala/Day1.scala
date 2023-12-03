@@ -11,7 +11,7 @@ object Day1 {
    */
   def sumCoordinates(): IO[Int] =
     for {
-      lines <- Input.loadAll("Day1.txt")
+      lines <- Input.loadAll[IO]("Day1.txt")
       digits <- {
         lines.map { line =>
           def getFirstDigit(string: String): IO[Char] = {

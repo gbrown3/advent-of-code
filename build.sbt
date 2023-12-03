@@ -12,6 +12,8 @@ lazy val root = project
     libraryDependencies ++= List(
       "org.typelevel" %% "cats-effect" % "3.5.2",
       "org.typelevel" %% "cats-core" % "2.10.0",
+      "co.fs2" %% "fs2-core" % "3.9.3",
+      "co.fs2" %% "fs2-io" % "3.9.3",
       "org.scalameta" %% "munit" % "0.7.29" % Test
     )
   )

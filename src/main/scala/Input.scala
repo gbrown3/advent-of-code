@@ -1,17 +1,21 @@
-import cats.effect.{IO, Resource}
-
-import scala.io.Source
+import cats.effect._
+import fs2.io.file.*
 
 object Input {
 
-  /**
-   * Loads entire file, concatenating into a newline-separated string
-   */
-  def loadAll(fileName: String): IO[List[String]] = {
-    val file: Resource[IO, Source] = Resource.make(
-      IO(Source.fromResource(fileName))
-    )(source => IO(source.close()))
+  private val PathToResources: String = "src/main/resources"
 
-    file.use(source => IO(source.getLines().toArray.toList))
+  /**
+   * Loads entire file in resources folder.
+   * @param fileName - must include file extension, ie .txt
+   * @tparam F - Effect type
+   * @return An effect that returns a list of lines from the input file
+   */
+  def loadAll[F[_]: Files: Concurrent](fileName: String): F[List[String]] = {
+    val path: Path = Path(s"$PathToResources/$fileName")
+    Files[F]
+      .readUtf8Lines(path)
+      .compile
+      .toList
   }
 }
