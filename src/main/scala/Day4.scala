@@ -4,15 +4,15 @@ import cats.effect.*
 object Day4 {
 
   final case class Card(winningNums: List[Int], actualNums: List[Int]) {
-    lazy val points: Int = {
-      val totalMatches = winningNums.intersect(actualNums).size
+    lazy val totalMatches: Int = winningNums.intersect(actualNums).size
+
+    lazy val points: Int =
       if (totalMatches > 1)
         1 * Math.pow(2.toDouble, (totalMatches - 1).toDouble).toInt
       else if (totalMatches == 1)
         1
       else
         0
-    }
   }
 
   def parseIntoCard(line: String): Card = {
@@ -47,5 +47,41 @@ object Day4 {
       points = cards.map(_.points)
       _ <- IO.println(s"Cards: $cards")
     } yield points.sumAll
+  }
+
+  def part2(): IO[Int] = {
+
+    def totalCardCopies(cards: List[Card]): Int = {
+
+      // Inner recursive function
+      def sumCopies(winningCardIndex: Int, cards: List[Card]): Int = {
+        val winningCard = cards(winningCardIndex)
+        val copies = cards.zipWithIndex.slice(winningCardIndex + 1, winningCardIndex + winningCard.totalMatches + 1)
+
+//        println(s"winning card: $winningCard")
+//        println(s"copies: $copies")
+
+        copies.foldLeft(0) { case (copiesSum, (card, index)) =>
+          if (card.totalMatches > 0)
+            copiesSum + 1 + sumCopies(index, cards)
+          else
+            copiesSum + 1
+        }
+      }
+
+      cards.zipWithIndex.foldLeft(0) { case (totalSum, (card, index)) =>
+        if (card.totalMatches > 0)
+          totalSum + 1 + sumCopies(index, cards)
+        else
+          totalSum + 1
+      }
+    }
+
+    for {
+      _ <- IO.println("Day4 Part 2: calculating...")
+      lines <- Input.loadAll[IO]("Day4.txt")
+      cards = lines.map(parseIntoCard)
+      totalCopies = totalCardCopies(cards)
+    } yield totalCopies
   }
 }
