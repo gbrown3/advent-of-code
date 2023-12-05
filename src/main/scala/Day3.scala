@@ -164,55 +164,87 @@ object Day3 {
 
   This time, you need to find the gear ratio of every gear and add them all up so that the engineer can figure out which gear needs to be replaced.
    */
-//  def part2(): IO[Int] = {
-//
-//    /*
-//    Approach:
-//
-//    1. Get all the part numbers, and their indices
-//    2. Scan in groups of three, check if there are any gear ratios
-//      a. How to determine if there's a gear ratio
-//        i. Look for *'s. Check how many part numbers are adjacent.
-//        ii. If exactly two parts are adjacent, we've found a gear ratio
-//     */
-//
-//    def getGearRatios(lines: List[String]): List[Int] = {
-//      def getGearRatiosFromLineGroup(
-//         maybeLineAbove: Option[String],
-//         currentLine: String,
-//         maybeLineBelow: Option[String]
-//       ): List[Int] = {
-//        val partNumbers = getPartNumbersFromLine(currentLine)
-//
-//        currentLine.zipWithIndex.foldLeft(List[Int]) { case (gearRatios, (char, index)) =>
-////          if (char == '*') {
-////            val adjacentPartNumbers =
-////          }
-//          List(0)
-//        }
-//      }
-//
-//      // NOTE - this doesn't account for first and last lines
-//      val middlePartNumbers = lines.sliding(3).toList.foldLeft(List.empty[Int]) {
-//        case (partNumbers, lineGroup) =>
-//          lineGroup match {
-//            // Standard group of three
-//            case lineAbove :: currentLine :: lineBelow :: Nil =>
-//              val newPartNumbers = getGearRatiosFromLineGroup(Some(lineAbove), currentLine, Some(lineBelow))
-//              partNumbers ++ newPartNumbers
-//          }
-//      }
-//
-//      val firstLinePartNumbers = getGearRatiosFromLineGroup(maybeLineAbove = None, lines.head, lines.tail.headOption)
-//      val lastLinePartNumbers = getGearRatiosFromLineGroup(Some(lines(lines.length - 2)), lines.last, None)
-//
-//      firstLinePartNumbers ++ middlePartNumbers ++ lastLinePartNumbers
-//    }
-//
-//
-//    for {
-//      lines <- Input.loadAll[IO]("Day3.txt")
-//      result = 2
-//    } yield result
-//  }
+  def part2(): IO[Int] = {
+
+    /*
+    Approach:
+
+    1. Get all the part numbers, and their indices
+    2. Scan in groups of three, check if there are any gear ratios
+      a. How to determine if there's a gear ratio
+        i. Look for *'s. Check how many part numbers are adjacent.
+        ii. If exactly two parts are adjacent, we've found a gear ratio
+     */
+
+    def getGearRatios(lines: List[String]): List[Int] = {
+
+      def getGearRatiosFromLineGroup(
+         maybeLineAbove: Option[String],
+         currentLine: String,
+         maybeLineBelow: Option[String]
+       ): List[Int] = {
+        val currentLinePartNumbers: List[PartNumber] = getPartNumbersFromLine(currentLine)
+        val lineAbovePartNumbers: List[PartNumber] = maybeLineAbove.fold(List.empty[PartNumber])(getPartNumbersFromLine)
+        val lineBelowPartNumbers: List[PartNumber] = maybeLineBelow.fold(List.empty[PartNumber])(getPartNumbersFromLine)
+
+        def buildPartIndexMap(parts: List[PartNumber]): Map[Int, List[PartNumber]] = {
+          parts.foldLeft(Map.empty[Int, List[PartNumber]]) { case (indexMap, part) =>
+            part.indices.foldLeft(indexMap) { case (map, index) =>
+              if (map.contains(index)) map.updated(index, map(index) :+ part)
+              else map.updated(index, List(part))
+            }
+          }
+        }
+
+        val partsByIndex: Map[Int, List[PartNumber]] =
+          buildPartIndexMap(currentLinePartNumbers ++ lineAbovePartNumbers ++ lineBelowPartNumbers)
+
+
+        currentLine.zipWithIndex.foldLeft(List.empty[Int]) { case (gearRatios, (char, index)) =>
+          if (char == '*') {
+            // Star found. Look around to see if it has gear ratios.
+
+            val adjacentParts: List[PartNumber] =
+              partsByIndex.get(index).orEmpty ++
+                partsByIndex.get(index - 1).orEmpty ++
+                partsByIndex.get(index + 1).orEmpty
+
+
+            adjacentParts.toSet.toList match {
+              case part1 :: part2 :: Nil =>
+
+                gearRatios :+ (part1.number * part2.number)
+              case _ =>
+                gearRatios
+            }
+          }
+          else
+            gearRatios
+        }
+      }
+
+      // NOTE - this doesn't account for first and last lines
+      val middlePartNumbers = lines.sliding(3).toList.foldLeft(List.empty[Int]) {
+        case (partNumbers, lineGroup) =>
+          lineGroup match {
+            // Standard group of three
+            case lineAbove :: currentLine :: lineBelow :: Nil =>
+              val newPartNumbers = getGearRatiosFromLineGroup(Some(lineAbove), currentLine, Some(lineBelow))
+              partNumbers ++ newPartNumbers
+          }
+      }
+
+      val firstLinePartNumbers = getGearRatiosFromLineGroup(maybeLineAbove = None, lines.head, lines.tail.headOption)
+      val lastLinePartNumbers = getGearRatiosFromLineGroup(Some(lines(lines.length - 2)), lines.last, None)
+
+      firstLinePartNumbers ++ middlePartNumbers ++ lastLinePartNumbers
+    }
+
+
+    for {
+      _ <- IO.println("Day 3 Part 2: calculating...")
+      lines <- Input.loadAll[IO]("Day3.txt")
+      gearRatios = getGearRatios(lines)
+    } yield gearRatios.sumAll
+  }
 }

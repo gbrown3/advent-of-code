@@ -29,7 +29,7 @@ object Day4 {
             .trim
             .split(" ")
             .toList
-            .filterNot(_.isEmpty)
+            .filterNot(_.isEmpty) // for some reason the input had some random extra spaces, so this is needed to clean things up a bit
             .map(_.toInt)
 
         val actualNumbers = actualNumberString.trim.split(" ").toList.filterNot(_.isEmpty).map(_.toInt)
@@ -57,9 +57,6 @@ object Day4 {
       def sumCopies(winningCardIndex: Int, cards: List[Card]): Int = {
         val winningCard = cards(winningCardIndex)
         val copies = cards.zipWithIndex.slice(winningCardIndex + 1, winningCardIndex + winningCard.totalMatches + 1)
-
-//        println(s"winning card: $winningCard")
-//        println(s"copies: $copies")
 
         copies.foldLeft(0) { case (copiesSum, (card, index)) =>
           if (card.totalMatches > 0)
