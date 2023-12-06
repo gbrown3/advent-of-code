@@ -7,13 +7,14 @@ lazy val root = project
     name := "advent-of-code",
     version := "0.1.0-SNAPSHOT",
 
-    scalaVersion := "3.3.1",
+    scalaVersion := "2.13.12",
 
     libraryDependencies ++= List(
       "org.typelevel" %% "cats-effect" % "3.5.2",
       "org.typelevel" %% "cats-core" % "2.10.0",
       "co.fs2" %% "fs2-core" % "3.9.3",
       "co.fs2" %% "fs2-io" % "3.9.3",
+      "com.beachape" %% "enumeratum" % "1.7.2",
       "org.scalameta" %% "munit" % "0.7.29" % Test
     )
   )

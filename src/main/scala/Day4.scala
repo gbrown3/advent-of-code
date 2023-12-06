@@ -1,5 +1,5 @@
-import cats.implicits.*
-import cats.effect.*
+import cats.implicits._
+import cats.effect._
 
 object Day4 {
 

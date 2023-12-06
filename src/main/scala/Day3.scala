@@ -1,5 +1,5 @@
-import cats.implicits.*
-import cats.effect.*
+import cats.implicits._
+import cats.effect._
 
 import scala.language.postfixOps
 
@@ -39,9 +39,10 @@ object Day3 {
 
     def hasSymbolAtIndex(string: String, index: Int): Boolean =
       if (index < 0 || index >= string.length) false // out of bounds
-      else
+      else {
         val char = string.charAt(index)
         validSymbol(char)
+      }
 
     // Check the current line. Are the characters to the left and right of this character symbols?
     val leftIsSymbol = hasSymbolAtIndex(currentLine, index - 1)
