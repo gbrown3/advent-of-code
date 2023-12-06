@@ -8,7 +8,7 @@ object Day4 {
 
     lazy val points: Int =
       if (totalMatches > 1)
-        1 * Math.pow(2.toDouble, (totalMatches - 1).toDouble).toInt
+        Math.pow(2.toDouble, (totalMatches - 1).toDouble).toInt
       else if (totalMatches == 1)
         1
       else
