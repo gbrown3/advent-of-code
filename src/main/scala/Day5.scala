@@ -27,17 +27,17 @@ object Day5 {
   }
 
   final case class AllInput(
-    seeds: List[Long],
-    seedToSoil: FarmMap,
-    soilToFertilizer: FarmMap,
-    fertilizerToWater: FarmMap,
-    waterToLight: FarmMap,
-    lightToTemp: FarmMap,
-    tempToHumidity: FarmMap,
-    humidityToLocation: FarmMap
+     seedsInput: List[Long],
+     seedToSoil: FarmMap,
+     soilToFertilizer: FarmMap,
+     fertilizerToWater: FarmMap,
+     waterToLight: FarmMap,
+     lightToTemp: FarmMap,
+     tempToHumidity: FarmMap,
+     humidityToLocation: FarmMap
    ) {
-    lazy val seedLocations: List[Long] = {
-      seeds.map { seed =>
+    def seedLocations(allSeeds: List[Long]): List[Long] = {
+      allSeeds.map { seed =>
         humidityToLocation.lookup(
           tempToHumidity.lookup(
             lightToTemp.lookup(
@@ -54,6 +54,20 @@ object Day5 {
           )
         )
       }
+    }
+
+    lazy val simpleSeedLocations: List[Long] = seedLocations(seedsInput)
+
+    lazy val rangeSeedLocations: List[Long] = {
+
+      val allSeeds = seedsInput.grouped(2).toList.foldLeft(List.empty[Long]) { (seeds, rangeDetails) =>
+         rangeDetails match {
+            case rangeStart :: rangeLength :: Nil =>
+              seeds ++ Range.Long(rangeStart, rangeStart + rangeLength, 1).toList
+          }
+      }
+
+      seedLocations(allSeeds)
     }
   }
 
@@ -164,7 +178,7 @@ object Day5 {
       .lastOrError
       .map { finalStreamState =>
         AllInput(
-          seeds = finalStreamState.seeds,
+          seedsInput = finalStreamState.seeds,
           seedToSoil = finalStreamState.maps(MapType.SeedToSoil),
           soilToFertilizer = finalStreamState.maps(MapType.SoilToFertilizer),
           fertilizerToWater = finalStreamState.maps(MapType.FertilizerToWater),
@@ -181,15 +195,15 @@ object Day5 {
     for {
       _ <- IO.println("Day5 part 1: calculating...")
       allInput <- parseInput("Day5.txt")
-    } yield allInput.seedLocations.min
+    } yield allInput.simpleSeedLocations.min
   }
 
-  def part2(): IO[Int] = {
+  def part2(): IO[Long] = {
 
     for {
       _ <- IO.println("Day5 part 2: calculating...")
-      lines <- Input.loadAll[IO]("Day5.txt")
-    } yield 0
+      allInput <- parseInput("Day5.txt")
+    } yield allInput.rangeSeedLocations.min
   }
 
 }
