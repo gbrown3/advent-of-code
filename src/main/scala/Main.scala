@@ -4,7 +4,7 @@ object Main extends IOApp.Simple {
 
   val run: IO[Unit] = for {
     _ <- IO.println("Starting Advent of Code Solver...")
-    result <- Day5.part2()
+    result <- Day6.part2()
     _ <- IO.println(s"Result: $result")
   } yield ()
 }
