@@ -23,7 +23,6 @@ object Day9 {
 
     def extrapolate(line: String): Int = {
       val ogNumSequence = line.split(" ").toList.map(_.toInt)
-
       val allSequences = getAllSequences(ogNumSequence, List.empty)
 
       allSequences.reverse.foldLeft(0) { case (extrapValue, nextSequence) =>
@@ -44,15 +43,8 @@ object Day9 {
       val ogNumSequence = line.split(" ").toList.map(_.toInt)
       val allSequences = getAllSequences(ogNumSequence, List.empty)
 
-//      println(s"all sequences: $allSequences")
-
       allSequences.reverse.foldLeft(0) { case (extrapValue, nextSequence) =>
-        val extrapolatedVal = nextSequence.head - extrapValue
-
-//        println(s"extrapolated: $extrapolatedVal for sequence $nextSequence")
-
-        extrapolatedVal
-
+        nextSequence.head - extrapValue
       }
     }
 
